@@ -1,0 +1,84 @@
+Started scanner test.
+tokentype:  3  value:   thisisanunusual
+tokentype:  1  which:    2            ;
+tokentype:  4  value:    What the #&*%!
+tokentype:  4  value:      Don't forget
+tokentype:  4  value:   Maximum of 15 c
+tokentype:  3  value:                 x
+tokentype:  1  which:    3            :
+tokentype:  0  which:    6            =
+tokentype:  5  type:     0          123
+tokentype:  0  which:    1            +
+tokentype:  5  type:     0    123456789
+tokentype:  0  which:    0             
+tokentype:  3  value:                 u
+tokentype:  3  value:                 v
+tokentype:  3  value:                 w
+tokentype:  3  value:                 x
+tokentype:  3  value:                 y
+tokentype:  3  value:                 z
+tokentype:  0  which:    0             
+tokentype:  0  which:    0             
+tokentype:  0  which:    0             
+tokentype:  0  which:    0             
+tokentype:  5  type:     0   1234567890
+tokentype:  5  type:     0   2147483647
+tokentype:  0  which:    0             
+tokentype:  5  type:     0            7
+Integer number out of range
+tokentype:  5  type:     0  -2147483648
+tokentype:  0  which:    0             
+Integer number out of range
+tokentype:  5  type:     0   1569325055
+tokentype:  0  which:    0             
+tokentype:  3  value:                 x
+tokentype:  0  which:    0             
+tokentype:  0  which:    0             
+tokentype:  5  type:     1 1.000000e+03
+tokentype:  0  which:    0             
+tokentype:  5  type:     1 1.000000e+09
+tokentype:  5  type:     1 2.000000e+09
+tokentype:  5  type:     1 3.000000e+09
+tokentype:  5  type:     1 1.000000e+10
+tokentype:  5  type:     1 3.140000e+00
+tokentype:  5  type:     0            1
+tokentype:  0  which:    0             
+tokentype:  5  type:     0           10
+tokentype:  5  type:     1 3.141590e+00
+tokentype:  5  type:     1 3.141593e+00
+tokentype:  5  type:     1 3.141593e+00
+tokentype:  5  type:     1 3.141593e+00
+tokentype:  5  type:     1 3.141593e+00
+tokentype:  0  which:    0             
+tokentype:  5  type:     1 3.141593e+06
+tokentype:  0  which:    0             
+tokentype:  5  type:     1 3.141593e+00
+tokentype:  5  type:     1 3.141593e+07
+tokentype:  5  type:     1 3.141593e+07
+tokentype:  5  type:     1 3.141593e+00
+tokentype:  5  type:     1 3.141593e+00
+tokentype:  5  type:     1 3.141593e+07
+tokentype:  0  which:    0             
+tokentype:  5  type:     1 3.141593e+07
+tokentype:  5  type:     1 3.141593e+07
+tokentype:  5  type:     1 3.141593e+00
+tokentype:  5  type:     1 3.141593e+00
+tokentype:  5  type:     1 1.457373e-06
+tokentype:  0  which:    0             
+tokentype:  5  type:     1 5.287230e-37
+tokentype:  0  which:    0             
+tokentype:  5  type:     1 -7.232960e+18
+tokentype:  0  which:    0             
+tokentype:  5  type:     1 3.141593e+07
+tokentype:  0  which:    0             
+tokentype:  5  type:     1 3.141593e-37
+tokentype:  5  type:     1 3.141593e-40
+tokentype:  0  which:    0             
+tokentype:  5  type:     1 3.141593e+03
+tokentype:  5  type:     0            7
+tokentype:  5  type:     1 3.141593e+03
+tokentype:  5  type:     0            9
+tokentype:  0  which:    0             
+tokentype:  5  type:     1 3.141593e+03
+tokentype:  5  type:     0   -198397773
+tokentype:  0  which:    0             

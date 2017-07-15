@@ -196,16 +196,13 @@ TOKEN number (TOKEN tok)
           && CHARCLASS[c] == NUMERIC)
   {
     c = getchar();
-//      digit_count++;
- 
-     charval = (c - '0');
+    digit_count++;
+    charval = (c - '0');
     // check for int overflow error
-    if(digit_count == 9 && num >= 214748364 && charval > 7)
+    if(digit_count == 10 && num >= 214748364 && charval > 7)
       int_overflow = 1;
 
     num = num * 10 + charval;
-    if(num > 0)
-      digit_count++;
   }
 
   c = getchar();
@@ -265,31 +262,37 @@ TOKEN number (TOKEN tok)
           && CHARCLASS[c] == NUMERIC)
       {
         c = getchar();
+        dec_digit_count++;
         if(limit < 8)
         {
           charval = (c - '0');
           f = f * 10 + charval;
-          dec_digit_count++;
           limit++;
         }
       }
-
     }
-  c = getchar(); 
+    c = getchar(); 
   }
 
   // check for e
   int e = 0;
   char sign;
 
-  if (c == 'e' && (CHARCLASS[peekchar()] == NUMERIC || peekchar() == '+' || peekchar() == '-'))
+ // if (c == 'e' && (CHARCLASS[peekchar()] == NUMERIC || peekchar() == '+' || peekchar() == '-'))
+  if (c == 'e')
   {
+    tok->tokentype = NUMBERTOK;
+    tok->datatype = REAL;
+    tok->realval = 5;
+    return (tok);
+
+
     c = getchar(); //numer or +/-
     if(CHARCLASS[c] == NUMERIC)
       e += (c -'0');
     else  // there is a sign after e
     {
-      sign = c; //get +/-
+      sign = getchar(); //get +/-
       while ( (c = peekchar()) != EOF
           && CHARCLASS[c] == NUMERIC)
       {
@@ -335,7 +338,7 @@ TOKEN number (TOKEN tok)
     if(expo > 38)
       float_overflow = 1;
 
-    for(int i = 0; i < dec_digit_count; ++i)
+    for(int i = 0; i < dec_digit_count; i++)
       f = f/10;
 
     if(e > 0) {

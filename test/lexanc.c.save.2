@@ -1,5 +1,3 @@
-
-
 /* lex1.c         14 Feb 01; 31 May 12       */
 
 /* This file contains code stubs for the lexical analyzer.
@@ -48,32 +46,29 @@ static char *deli[] = {",", ";", ":", "(",  ")", "[", " ]", ".."};
 /* Skip blanks and whitespace.  Expand this function to skip comments too. */
 void skipblanks ()
 {
-  int c;
-  int c2;
-  while ((c = peekchar()) != EOF
-           && (c == ' ' || c == '\n' || c == '\t' || c == '{' 
-           || (c == '(' && (c2 = peek2char()) == '*')))
-  {
-    c = getchar();
-      if(c == '{'){
-        while ((c = peekchar()) != EOF && c != '}')
-        {
-          c = getchar();
-        }
-      }
-      else if(c == '(')
+      char c;
+      while ((c = peekchar()) != EOF
+             && (c == ' ' || c == '\n' || c == '\t' || c == '{' || (c == '(' && peek2char() == '*')))
       {
-        c = getchar(); //'*'
-        while ((c = peekchar()) != EOF
-               && (c != '*' || peek2char() != ')'))
+        c = getchar();
+        if(c == '{')
         {
           c = getchar();
+          while(c != '}')
+          {
+            getchar();
+          }
         }
-	getchar();
-	getchar();
-      }
-  }
 
+       // {abc}
+       /* if(c == '(' && peekchar() == '*')
+        {
+          while(!(c == '*' && peekchar() == ')'))
+          {
+            getchar();
+          }
+        }*/
+      }
 }
 
 /* Get identifiers and reserved words */
@@ -183,180 +178,27 @@ TOKEN number (TOKEN tok)
   long num;
   int  c, charval;
   num = 0;
-  double f;
-  int int_overflow = 0;
-  int float_overflow = 0;
-  int dot = 0;
-  int expo = 0;
-  int limit = 0; // to count for significand digits
-  int digit_count = 0;
-  int dec_digit_count = 0;
-
+  float f;
   while ( (c = peekchar()) != EOF
           && CHARCLASS[c] == NUMERIC)
   {
     c = getchar();
-//      digit_count++;
- 
-     charval = (c - '0');
-    // check for int overflow error
-    if(digit_count == 9 && num >= 214748364 && charval > 7)
-      int_overflow = 1;
-
+    if(c == 'e')
+    {
+      f = num;
+      c = getchar();
+      if(CHARCLASS[c] == NUMERIC)
+      {
+        
+      }
+    }
+    charval = (c - '0');
     num = num * 10 + charval;
-    if(num > 0)
-      digit_count++;
   }
 
-  c = getchar();
-
-  // if the number is integer return integer
-  if((c != '.' && c != 'e') || (c == '.' && CHARCLASS[peekchar()] != NUMERIC))
-  {
-    // print int overflow
-    if(int_overflow == 1)
-      printf("Integer number out of range\n");
-
+  //if exp = 1, return integer
     tok->tokentype = NUMBERTOK;
     tok->datatype = INTEGER;
     tok->intval = num;
     return (tok);
-   }
-
-  // now the number is FP
-
-  f = num;
-  if(c == '.' && CHARCLASS[peekchar()] == NUMERIC)
-  {
-
-    //The number form is 0.001433 and 000.00333
-    if(f == 0)
-    {
-      expo--; // expo == -1
-
-      // count 0s right after decimal
-      while ( (c = peekchar()) != EOF
-          && CHARCLASS[c] == NUMERIC && c == '0')
-      {
-        c = getchar();
-        expo--;
-      }
-      // count significant
-      while ( (c = peekchar()) != EOF
-          && CHARCLASS[c] == NUMERIC)
-      {
-        c = getchar();
-        if(limit < 8)
-        {
-          charval = (c - '0');
-          f = f * 10 + charval;
-          limit++;
-        }
-      }
-    }
-    //3.144444 or 31444.4444 -> 3.14
-    else {
-      if(digit_count < 8)
-      	limit = digit_count;
-      else
-        limit = 8;
-
-      while ( (c = peekchar()) != EOF
-          && CHARCLASS[c] == NUMERIC)
-      {
-        c = getchar();
-        if(limit < 8)
-        {
-          charval = (c - '0');
-          f = f * 10 + charval;
-          dec_digit_count++;
-          limit++;
-        }
-      }
-
-    }
-  c = getchar(); 
-  }
-
-  // check for e
-  int e = 0;
-  char sign;
-
-  if (c == 'e' && (CHARCLASS[peekchar()] == NUMERIC || peekchar() == '+' || peekchar() == '-'))
-  {
-    c = getchar(); //numer or +/-
-    if(CHARCLASS[c] == NUMERIC)
-      e += (c -'0');
-    else  // there is a sign after e
-    {
-      sign = c; //get +/-
-      while ( (c = peekchar()) != EOF
-          && CHARCLASS[c] == NUMERIC)
-      {
-        c = getchar();
-        charval = c - '0';
-        e = e*10 + charval;
-      }
-      if(sign  == '-')
-	e = e*(-1);
-    }
-  }
-
-  // express the FP in scientific representation
-
-  // num < 0
-  if(digit_count == 0)
-  {
-    if(dot == 0)
-      expo = 0;
-    else
-      expo = expo - (limit-1) + e;
-    // out of range error
-    if(expo < -38)
-    {
-      printf("Floating number out of range\n");
-      tok->tokentype = NUMBERTOK;
-      tok->datatype = REAL;
-      tok->realval = f;
-      return (tok);
-    }
-    expo = (~expo) + 1;
-    for(int i = 0; i < expo; i++)
-    {
-      f = f/10;
-    }
-  }
-
-  // number > 0
-  else if(digit_count >= 0)
-  {
-    expo = digit_count + e - 1;
-    // out of range error
-    if(expo > 38)
-      float_overflow = 1;
-
-    for(int i = 0; i < dec_digit_count; ++i)
-      f = f/10;
-
-    if(e > 0) {
-       for(int i = 0; i < e; i++)
-        f = f*10;
-    }
-    else
-    {
-       e = e*(-1);
-       for(int i = 0; i < e; i++)
-         f = f/10;
-    }
-  }
-
-  //return error message
-  if(float_overflow == 1)
-    printf("Floating number out of range\n");
-
-  //return the FP
-  tok->tokentype = NUMBERTOK;
-  tok->datatype = REAL;
-  tok->realval = f;
-  return (tok);
 }
