@@ -146,178 +146,140 @@ TOKEN getstring (TOKEN tok)
 
 TOKEN special (TOKEN tok)
 {
+  int nc;
   char c;
-  char c2;
-  char str[5];
+  char str[2];
   while( (c = peekchar()) != EOF
         && CHARCLASS[c] == SPECIAL)
   {
     c = getchar();
     str[0] = c;
-    if(CHARCLASS[peekchar()] == SPECIAL && c != peekchar())
-    {
+    if(peekchar() != EOF)
       str[1] = peekchar();
-    
-      for(int i = 0; i < NUM_OPS; ++i)
+    for(int i = 0; i < NUM_OPS_SYM; ++i)
+    {
+      if(strcmp(ops_sym[i], str)
+
+ || strcmp(ops_sym[i], str[0]) == 0)
       {
-        if(strcmp(str, ops_sym[i]) == 0)
-        {
-          getchar();
-          tok->tokentype =  OPERATOR;
-          tok->whichval =  (i+1);
-          return tok;
-        }
-      }
-      for(int i = 0; i < NUM_DELI; ++i)
-      {
-        if(strcmp(str, deli[i]) == 0)
-        {
-          getchar();
-          tok->tokentype =  DELIMITER;
-          tok->whichval =  (i+1);
-          return tok;
-        }
+        tok->tokentype = OPERATOR;
+        tok->whichval = (i+1);
+        return tok;
       }
     }
-    else if(c == '.' && peekchar() == '.')
+    // Delimiter
+    for(int i = 0; i < NUM_DELI; ++i)
     {
-      getchar();
-      tok->tokentype =  DELIMITER;
-      tok->whichval =  8;
-      return tok;
-    }
-    else
-    {
-      for(int i = 0; i < NUM_OPS; ++i)
+      if(strcmp(deli[i], str)== 0)
       {
-        if(strcmp(str, ops_sym[i]) == 0)
-        {
-          getchar();
-          tok->tokentype =  OPERATOR;
-          tok->whichval =  (i+1);
-          return tok;
-        }
-      }
-      for(int i = 0; i < NUM_DELI; ++i)
-      {
-        if(strcmp(str, deli[i]) == 0)
-        {
-          getchar();
-          tok->tokentype =  DELIMITER;
-          tok->whichval =  (i+1);
-          return tok;
-        }
+        tok->tokentype = DELIMITER;
+        tok->whichval = (i+1);
+        return tok;
       }
     }
   }
-
 }
 
 /* Get and convert unsigned numbers of all types. */
 TOKEN number (TOKEN tok)
 {
-  long num = 0;
-  double f = 0;
-  int nc = 0;
-  int c, charval;
-  int int_overflow = 0;
-  int float_overflow = 0;
-  int expo = 0; // exponent to mutiply to get the original value
-  int exponent = 0; // exponent that is mult by scientific rep.
-  int num_sig = 0; 
-
+  long num;
+  int  c, charval;
+  num = 0;
+  double f;
+  int dot = 0;
+  int expo = 0;
+  int limit = 0; // to count for significand digits
+  int digit_count = 0;
   while ( (c = peekchar()) != EOF
           && CHARCLASS[c] == NUMERIC)
   {
-    // TO DO: CHECK float OVERFLOW
-
     c = getchar();
+    digit_count++;
     charval = (c - '0');
-
-    // check for int overflow
-    if(nc > 10 || num > 214748364 || (num == 214748364 && charval > 7 ))
-      int_overflow = 1;
-
-    // increase int value
-    num = num*10 + charval;
-
-    // incase nc
-    if(f > 0 || charval > 0)
+    // return error for integer
+    if(digit_count == 10 && num >= 214748364 && charval > 7)
     {
-      nc++;
-      if(num_sig < 8)
-      {
-        num_sig++;
-        f = f*10 + charval;
-      }
-      else
-        expo++;
+      printf("Integer number out of range\n");
+      tok->tokentype = NUMBERTOK;
+      tok->datatype = INTEGER;
+      tok->intval = num;
+      return (tok);
     }
+    num = num * 10 + charval;
   }
 
   c = getchar();
-
   // if the number is integer return integer
-  if((c != '.' && c != 'e') || (c == '.' && CHARCLASS[peekchar()] != NUMERIC))
+  if(c != '.' && c != 'e' || (c == '.' && CHARCLASS[peekchar()] != NUMERIC))
   {
-    // print int overflow
-    if(int_overflow == 1)
-    printf("Integer number out of range\n");
+   // printf("digit_count %d: ", digit_count);
+   // printf("\n");
     tok->tokentype = NUMBERTOK;
     tok->datatype = INTEGER;
     tok->intval = num;
     return (tok);
   }
 
-  if(num_sig > 0)
-    exponent  += (num_sig -1) + expo;
-  else
-    exponent -= 1;
-  // now the number is FP from here
+  // if the number is FP
   if(c == '.' && CHARCLASS[peekchar()] == NUMERIC)
   {
-    while ( (c = peekchar()) != EOF
-          && CHARCLASS[c] == NUMERIC)
+    dot = 1;
+    f = num;
+    //The number form is 0.001433 and 000.00333
+    if(f == 0)
     {
-      c = getchar();
-      if(num_sig < 8)
-        charval = c - '0';
-        if(f > 0 || charval > 0) // 0.001111111, 111.001
-        {
-          f = f * 10 + charval;
-          num_sig++;
-          expo--;
-        }
-        else
-        {
-	  exponent--;
-          expo--;
-	}
-    }
-  c = getchar();
-  }
-
-  // check for e
-  int e = 0;
-  char sign;
-
-  if (c == 'e' && (CHARCLASS[peekchar()] == NUMERIC || peekchar() == '+' || peekchar() == '-'))
-  {
-   // c = getchar(); //numer or +/-
-    if(CHARCLASS[peekchar()] == NUMERIC) {
-      while(peekchar() != EOF && CHARCLASS[peekchar()] == NUMERIC)
+      expo--; // expo == -1
+      // count 0s right after decimal
+      while ( (c = peekchar()) != EOF
+          && CHARCLASS[c] == NUMERIC && c == '0')   
       {
         c = getchar();
-        charval = c -'0';
-        e = e*10 + charval;
+        expo--;
       }
-      expo += e;
-      exponent += e;
+      // count 0
+      while ( (c = peekchar()) != EOF
+          && CHARCLASS[c] == NUMERIC)
+      {
+        c = getchar();
+        if(limit < 8)
+        {
+          charval = (c - '0');
+          f = f * 10 + charval;
+          limit++;
+        }
+      }
     }
+    //3.144444 or 31444.4444 -> 3.14
+    else {
+      if(digit_count < 8)
+      	limit = digit_count;
+
+      while ( (c = peekchar()) != EOF
+          && CHARCLASS[c] == NUMERIC)
+      {
+        c = getchar();
+        if(limit < 8)
+        {
+          charval = (c - '0');
+          f = f * 10 + charval;
+          limit++;
+        }
+      }
+    }
+  }
+
+  c = getchar();
+  int e = 0;
+  char sign;
+  if (c == 'e')
+  {
+    c = getchar();
+    if(CHARCLASS[c] == NUMERIC)
+      e += (c -'0');
     else  // there is a sign after e
     {
-      c = getchar();
-      sign = c; //get +/-
+      sign = getchar(); //get +/-
       while ( (c = peekchar()) != EOF
           && CHARCLASS[c] == NUMERIC)
       {
@@ -325,37 +287,65 @@ TOKEN number (TOKEN tok)
         charval = c - '0';
         e = e*10 + charval;
       }
-      if(sign  == '-')
-      {
-        expo -= e;
-	exponent -= e;
-      }
+
+      if(sign == '+')
+        expo+= e;
       else
-      {
-        expo += e;
-        exponent += e;
-      }
+	expo-= e;
     }
   }
 
-   // express the FP in scientific representation
-  if(exponent > 38 || exponent < -38)
-    printf("Floating number out of range\n");
+  // express the FP in scientific representation: 3.14
+
+  // if expo < 0, change it to positive
   if(expo < 0)
   {
-    expo = expo*(-1);
-    for(int i = 0; i < expo; ++i)
-      f = f/10;
-  }
-  else
-  {
+    if(dot == 0)
+      expo = 0;
+    else
+      expo = expo - (limit-1) + e;
+    // out of range error
+    if(expo < -38)
+    {
+      printf("Floating number out of range\n");
+      tok->tokentype = NUMBERTOK;
+      tok->datatype = REAL;
+      tok->realval = f;
+      return (tok);
+    }
+    expo = (~expo) + 1;
     for(int i = 0; i < expo; i++)
-         f = f*10;
+    {
+      f = f/10;
+    }
   }
 
-  // return token object
+  // expo > 0
+  else
+  {
+    if(dot == 0)
+      expo = e;
+    else
+      expo = limit - digit_count + e;
+    // out of range error
+    if(expo > 38)
+    {
+      printf("Floating number out of range\n");
+      tok->tokentype = NUMBERTOK;
+      tok->datatype = REAL;
+      tok->realval = f;
+      return (tok); 
+    }
+
+    for(int i = 0; i < expo; i++)
+    {
+      f = f/10; //f = 11
+    }
+  }
+
+  //return the FP
   tok->tokentype = NUMBERTOK;
   tok->datatype = REAL;
   tok->realval = f;
-  return (tok);
+  return (tok); 
 }
