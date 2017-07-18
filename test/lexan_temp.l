@@ -1,3 +1,4 @@
+
 %{    /* lex2.l -- partial lex specification for Pascal    22 Jul 13 */
 
 /* Copyright (c) 2013 Gordon S. Novak Jr. and The University of Texas at Austin
@@ -17,18 +18,14 @@
    along with this program; if not, see <http://www.gnu.org/licenses/>. */
 
 /* To use:
-        make lex2
-        lex2
-        x < 3.14            */
+        make lexan
+        lexer
+        x < 3.14           
+ */
 
 /* This file will work as given on a simple input such as:
    if i<j then x := 3.14
-
-   Copy this file to lexan.l and expand it for your assignment.
-   Use:
-        make lexer
-        lexer <graph1.pas
-   */
+*/
 
 #include <ctype.h>
 #include "token.h"
@@ -36,9 +33,8 @@
 
 int maketoken(int type, int which);
 int install_id();
-int install_string();
-int install_inum(); // for integer
-int install_fnum(); // for float
+int install_str();
+int install_fnum();
 int yywrap();
 
 /* If the lex yytext buffer turns out to be too small to hold comments,
@@ -51,52 +47,18 @@ TOKEN yylval;     /* This is the type of the lexical analyzer result */
 
 %}
 
+/* regular definitions */
 
 delim    [ \t\n]
 ws       {delim}+
-comment  \{[^\}]*\}|\(\*[(?!\*\))]*\*\)|\(\*[^\*\)]*\*\)
 letter   [A-Za-z]
 digit    [0-9]
 id       {letter}({letter}|{digit})*
-string   '([^']|'{2})*'
-inumber  {digit}*
-
-fnumber  {digit}+(\.{digit}+)?(e[+\-]?{digit}+)?
+fnumber  {digit}+(\.{digit}+)?(E[+\-]?{digit}+)?
+str      '(?:[^']+|'')*'
 %%
 
-
 {ws}      { /* no action and no return */ }
-{comment}   { /* no action and no return */ }
-
-and       {return maketoken(OPERATOR, AND);}
-or        {return maketoken(OPERATOR, OR);}
-not       {return maketoken(OPERATOR, NOT);}
-div       {return maketoken(OPERATOR, DIV);}
-mod       {return maketoken(OPERATOR, MOD);}
-in        {return maketoken(OPERATOR, IN);}
-"+"       {return(maketoken(OPERATOR, PLUS));}
-"-"       {return(maketoken(OPERATOR, MINUS));}
-"*"       {return(maketoken(OPERATOR, TIMES));}
-"/"       {return(maketoken(OPERATOR, DIVIDE));}
-"<"       {return(maketoken(OPERATOR, LT));}
-"<="      {return(maketoken(OPERATOR, LE));}
-"="       {return(maketoken(OPERATOR, EQ));}
-"<>"      {return(maketoken(OPERATOR, NE));}
-">"       {return(maketoken(OPERATOR, GT));}
-">="      {return(maketoken(OPERATOR, GE));}
-":="      {return(maketoken(OPERATOR, ASSIGN));}
-"^"       {return(maketoken(OPERATOR, POINT));}
-"."       {return(maketoken(OPERATOR, DOT));}
-
-","       {return(maketoken(DELIMITER, COMMA));}
-";"       {return(maketoken(DELIMITER, SEMICOLON));}
-":"       {return(maketoken(DELIMITER, COLON));}
-"("       {return(maketoken(DELIMITER, LPAREN));}
-")"       {return(maketoken(DELIMITER, RPAREN));}
-"["       {return(maketoken(DELIMITER, LBRACKET));}
-"]"       {return(maketoken(DELIMITER, RBRACKET));}
-".."      {return(maketoken(DELIMITER, DOTDOT));}
-
 array     {return(maketoken(RESERVED, ARRAY));}
 begin     {return(maketoken(RESERVED, BEGINBEGIN));}
 case      {return(maketoken(RESERVED, CASE));}
@@ -105,7 +67,7 @@ do        {return(maketoken(RESERVED, DO));}
 downto    {return(maketoken(RESERVED, DOWNTO));}
 else      {return(maketoken(RESERVED, ELSE));}
 end       {return(maketoken(RESERVED, END));}
-file      {return(maketoken(RESERVED, FILEFILE));}
+file       {return(maketoken(RESERVED, FILEFILE));}
 for       {return(maketoken(RESERVED, FOR));}
 function  {return(maketoken(RESERVED, FUNCTION));}
 goto      {return(maketoken(RESERVED, GOTO));}
@@ -127,10 +89,33 @@ var       {return(maketoken(RESERVED, VAR));}
 while     {return(maketoken(RESERVED, WHILE));}
 with      {return(maketoken(RESERVED, WITH));}
 
+
 {id}      {return(install_id());}
-{string}  {return(install_string());}
-{inumber}  {return(install_inum());}
 {fnumber} {return(install_fnum());}
+{str}     {return(install_str());}
+
+"+"	  {return(maketoken(OPERATOR, PLUS));}
+"-"	  {return(maketoken(OPERATOR, MINUS));}
+"*"	  {return(maketoken(OPERATOR, TIMES));}
+"/"	  {return(maketoken(OPERATOR, DIVIDE));}
+"<"       {return(maketoken(OPERATOR, LT));}
+"<="      {return(maketoken(OPERATOR, LE));}
+"="       {return(maketoken(OPERATOR, EQ));}
+"<>"      {return(maketoken(OPERATOR, NE));}
+">"       {return(maketoken(OPERATOR, GT));}
+">="      {return(maketoken(OPERATOR, GE));}
+":="      {return(maketoken(OPERATOR, ASSIGN));}
+"."       {return(maketoken(OPERATOR, DOT));}
+"^"	  {return(maketoken(OPERATOR, POINT));}
+
+","       {return(maketoken(DELIMITER, COMMA));}
+";"       {return(maketoken(DELIMITER, SEMICOLON));}
+":"       {return(maketoken(DELIMITER, COLON));}
+"("       {return(maketoken(DELIMITER, LPAREN));}
+")"       {return(maketoken(DELIMITER, RPAREN));}
+"["       {return(maketoken(DELIMITER, LBRACKET));}
+"]"       {return(maketoken(DELIMITER, RBRACKET));}
+".."      {return(maketoken(DELIMITER, DOTDOT));}
 
 %%
 
@@ -166,44 +151,48 @@ int install_id()
      yylval->stringval[i] = c;
     };
   yylval->stringval[n] = '\0';
-          /* printf("id  %10s   n = %4d\n", yytext, n); */
+        /* printf("id  %10s   n = %4d\n", yytext, n); */
   return(IDENTIFIER);
  }
 
- int install_string()
- { int i, c, n, endOfString;
+int install_str()
+ { 
+
+  int i, b, c, n, d;
   yylval = (TOKEN) talloc();  /* Make new token, set yylval to point to it */
   yylval->tokentype = STRINGTOK;
-  i = 1;
-  n = 0;
-  endOfString = 0;
+  n = yyleng;            /* number of characters */
 
-  while(i < 16 && endOfString == 0)
+  if ( n > 15 ) n = 15;
+  d = 0;
+
+  for (i = 0, b = 1; i < n ; i++, b++)
+
   { 
-    c = yytext[i];
-    if (c == '\'' && yytext[i+1] == '\0')
-      endOfString = 1;
-    else {
-      yylval->stringval[n] = c;
-      n++;
-      i++;
+    c = yytext[b];
+      /* if (islower(c)) c = toupper(c); */ /* to raise to upper case */
+
+    if (c == '\'' && yytext[i+1] == '\'') {
+      yylval->stringval[i] = c;
+      b++;
+      d++;
     }
-  }
-  /* printf("id  %10s   n = %4d\n", yytext, n); */
+
+    else if (c == '\'') 
+    {
+    }
+
+    else yylval->stringval[i] = c;
+  };
+
+  if (n != 15)
+    d++;   
+
+  yylval->stringval[n-d] = '\0';
+    /* printf("id  %10s   n = %4d\n", yytext, n); */
   return(STRING);
- }
 
-int install_inum() {  /* Note -- you may use sscanf for this assignment. */
-  int inum;
-  yylval = (TOKEN) talloc();   /* Make new token, set yylval to point to it */
-  yylval->tokentype = NUMBERTOK;
-  yylval->datatype = INTEGER;
-       /* printf("num %10s   n = %4d\n",yytext,yyleng); */
-  sscanf(yytext, "%d", &inum);
-  yylval->intval = inum;
-  return(NUMBER);
- }
-
+}
 
 int install_fnum() {  /* Note -- you may use sscanf for this assignment. */
   float fnum;
@@ -214,9 +203,6 @@ int install_fnum() {  /* Note -- you may use sscanf for this assignment. */
   sscanf(yytext, "%f", &fnum);
   yylval->realval = fnum;
   return(NUMBER);
- } 
-
- 
-
+ }
 
 int yywrap() {  return(1);  }       /* lex may need this. */
