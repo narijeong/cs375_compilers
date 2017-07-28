@@ -1,0 +1,151 @@
+cons
+ token 8223328  ID             i  dtype  0  link 8223456
+ token 8223456  ID           lim  dtype  0  link 0
+binop
+ token 8289584  OP            :=  dtype  0  link 0  operands 8289520
+ token 8289520  ID           lim  dtype  0  link 8289648
+ token 8289648  NUM            7  dtype  0  link 0
+binop
+ token 8289904  OP            :=  dtype  0  link 0  operands 8289840
+ token 8289840  ID             i  dtype  0  link 8289968
+ token 8289968  NUM            0  dtype  0  link 0
+makefuncall
+ token 8290480  OP       funcall  dtype  0  link 0  operands 8290224
+ token 8290224  ID       writeln  dtype  0  link 8290352
+ token 8290352  STR            *  dtype  0  link 0
+makeprogn
+ token 8290544  OP         progn  dtype  0  link 0  operands 8289904
+ token 8289904  OP            :=  dtype  0  link 0  operands 8289840
+ token 8290672  NUM            0  dtype  0  link 0
+makelabel
+ token 8290608  OP         label  dtype  0  link 0  operands 8290672
+makeop
+ token 8290736  OP            <=  dtype  0  link 0  operands 0
+makeop
+ token 8290800  OP             +  dtype  0  link 0  operands 0
+makeprogn
+ token 8290928  OP         progn  dtype  0  link 0  operands 8290480
+ token 8290480  OP       funcall  dtype  0  link 0  operands 8290224
+makeif
+ token 8290864  OP            if  dtype  0  link 0  operands 8290736
+ token 8290736  OP            <=  dtype  0  link 8290928  operands 0
+ token 8290928  OP         progn  dtype  0  link 0  operands 8290480
+ token 0  NULL
+copytok
+ token 8290992  ID             i  dtype  0  link 8289968
+makeop
+ token 8291056  OP            :=  dtype  0  link 0  operands 0
+copytok
+ token 8291120  ID             i  dtype  0  link 8290096
+copytok
+ token 8291184  ID             i  dtype  0  link 8290096
+ token 8291248  NUM            1  dtype  0  link 0
+ token 8291376  NUM            0  dtype  0  link 0
+makegoto
+ token 8291312  OP          goto  dtype  0  link 0  operands 8291376
+makefor
+ token 8290544  OP         progn  dtype  0  link 0  operands 8289904
+ token 8289904  OP            :=  dtype  0  link 8290608  operands 8289840
+ token 8290096  ID           lim  dtype  0  link 0
+ token 0  NULL
+ token 0  NULL
+ token 8290736  OP            <=  dtype  0  link 8290928  operands 8290992
+ token 8290800  OP             +  dtype  0  link 0  operands 8291184
+ token 8290992  ID             i  dtype  0  link 8290096
+ token 8291120  ID             i  dtype  0  link 8290800
+ token 8291184  ID             i  dtype  0  link 8291248
+cons
+ token 8290544  OP         progn  dtype  0  link 0  operands 8289904
+ token 0  NULL
+cons
+ token 8289584  OP            :=  dtype  0  link 8290544  operands 8289520
+ token 8290544  OP         progn  dtype  0  link 0  operands 8289904
+makeprogn
+ token 8289456  OP         progn  dtype  0  link 0  operands 8289584
+ token 8289584  OP            :=  dtype  0  link 8290544  operands 8289520
+makeprogn
+ token 8291632  OP         progn  dtype  0  link 0  operands 8223072
+ token 8223072  ID        output  dtype  0  link 0
+makeprogram
+ token 8291568  OP       program  dtype  0  link 0  operands 8222944
+ token 8222944  ID        graph1  dtype  0  link 8291632
+ token 8291632  OP         progn  dtype  0  link 8289456  operands 8223072
+ token 8223072  ID        output  dtype  0  link 0
+Symbol table level 0
+ 8134672        real  BASIC  basicdt   1          siz     8
+ 8134768     integer  BASIC  basicdt   0          siz     4
+ 8134864        char  BASIC  basicdt   2          siz     1
+ 8134960     boolean  BASIC  basicdt   3          siz     4
+ 8135056         exp  knd 5 0  typ 8135152  lvl  0  siz     0  off     0
+(FUNCTION real
+          real)
+ 8135344       trexp  knd 5 0  typ 8135440  lvl  0  siz     0  off     0
+(FUNCTION real
+          real)
+ 8135632         sin  knd 5 0  typ 8135728  lvl  0  siz     0  off     0
+(FUNCTION real
+          real)
+ 8135920         cos  knd 5 0  typ 8136016  lvl  0  siz     0  off     0
+(FUNCTION real
+          real)
+ 8136208       trsin  knd 5 0  typ 8136304  lvl  0  siz     0  off     0
+(FUNCTION real
+          real)
+ 8136496        sqrt  knd 5 0  typ 8136592  lvl  0  siz     0  off     0
+(FUNCTION real
+          real)
+ 8136784       round  knd 5 0  typ 8136880  lvl  0  siz     0  off     0
+(FUNCTION real
+          real)
+ 8137072      iround  knd 5 0  typ 8137168  lvl  0  siz     0  off     0
+(FUNCTION integer
+          real)
+ 8137360         ord  knd 5 0  typ 8137456  lvl  0  siz     0  off     0
+(FUNCTION integer
+          integer)
+ 8137648         new  knd 5 0  typ 8137744  lvl  0  siz     0  off     0
+(FUNCTION integer
+          integer)
+ 8137936       trnew  knd 5 0  typ 8138032  lvl  0  siz     0  off     0
+(FUNCTION integer
+          integer)
+ 8138224       write  knd 5 0  typ 8138320  lvl  0  siz     0  off     0
+(FUNCTION NULL
+          char)
+ 8138512     writeln  knd 5 0  typ 8138608  lvl  0  siz     0  off     0
+(FUNCTION NULL
+          char)
+ 8138800      writef  knd 5 0  typ 8138896  lvl  0  siz     0  off     0
+(FUNCTION NULL
+          real)
+ 8139088    writelnf  knd 5 0  typ 8139184  lvl  0  siz     0  off     0
+(FUNCTION NULL
+          real)
+ 8139376      writei  knd 5 0  typ 8139472  lvl  0  siz     0  off     0
+(FUNCTION NULL
+          integer)
+ 8139664    writelni  knd 5 0  typ 8139760  lvl  0  siz     0  off     0
+(FUNCTION NULL
+          integer)
+ 8139952        read  knd 5 0  typ 8140048  lvl  0  siz     0  off     0
+(FUNCTION NULL
+          NULL)
+ 8140240      readln  knd 5 0  typ 8140336  lvl  0  siz     0  off     0
+(FUNCTION NULL
+          NULL)
+ 8140528         eof  knd 5 0  typ 8140624  lvl  0  siz     0  off     0
+(FUNCTION boolean
+          NULL)
+Symbol table level 1
+ 8289200           i  VAR    0 typ integer  lvl  1  siz     4  off     0
+ 8289296         lim  VAR    0 typ integer  lvl  1  siz     4  off     4
+yyparse result =        0
+ token 8291568  OP       program  dtype  0  link 0  operands 8222944
+(program graph1 (progn output)
+                (progn (:= lim 7)
+                       (progn (:= i 0)
+                              (label 0)
+                              (if (<= i lim)
+                                  (progn (funcall writeln '*')
+                                         (:= i (+ i 1))
+                                         (goto 0))))))

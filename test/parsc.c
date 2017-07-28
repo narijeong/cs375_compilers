@@ -1,4 +1,4 @@
-/* parsc.c    Pascal Parser      Gordon S. Novak Jr.    02 Nov 05    */
+/* pars1c.c    Pascal Parser      Gordon S. Novak Jr.    02 Nov 05    */
 
 /* This file contains a parser for a Pascal subset using the techniques of
    recursive descent and operator precedence.  The Pascal subset is equivalent
