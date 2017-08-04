@@ -76,23 +76,24 @@ TOKEN parseresult;
 
 
 %%
-  program    : PROGRAM IDENTIFIER LPAREN IDENTIFIER RPAREN SEMICOLON lBlock DOT { parseresult = makeprogram($2, $4, $7); }
+  program    : PROGRAM IDENTIFIER LPAREN IDENTIFIER RPAREN SEMICOLON block statement DOT { parseresult = makeprogram($2, $4, $8); }
              ;
 
-  lBlock     : cBlock                          { $$ = $1; }
+//  TO DO: Make more blocks
+  block      : vBlock
+             | cBlock
              ;
 
-
-  cBlock     : CONST c_list tBlock             { $$ = $3; }
-             | tBlock                          { $$ = $1; }
+  cBlock     : CONST c_list tBlock
+             | tBlock
 	     ;
 
 
   c_list     : IDENTIFIER EQ NUMBER SEMICOLON c_list { instconst($1, $3); }
              | IDENTIFIER EQ NUMBER SEMICOLON  { instconst($1, $3); }
-             ;  
+	     ;  
 
-  tBlock     : TYPE tdef_list vBlock           { $$ = $3; }
+  tBlock     : TYPE tdef_list vBlock
              | vBlock                          { $$ = $1; }
              ;
 
@@ -110,10 +111,7 @@ TOKEN parseresult;
              ;
 
 
-  vBlock     : VAR vdef_list block             { $$ = $3; }       
-             ;
-
-  block      : BEGINBEGIN statement endpart   { $$ = makeprogn($1,cons($2, $3)); }
+  vBlock     : VAR vdef_list                   
              ;
 
   vdef_list  : vdef SEMICOLON vdef_list        
@@ -133,20 +131,10 @@ TOKEN parseresult;
   statement  :  BEGINBEGIN statement endpart   { $$ = makeprogn($1,cons($2, $3)); }
              |  IF expr THEN statement endif   { $$ = makeif($1, $2, $4, $5); }
              |  FOR assignment TO IDENTIFIER DO statement { $$ = makefor(1, (TOKEN) talloc(), $2, $4, NULL, NULL, $6); }            
-            // |  assignment_list statement      { $$ = cons($1, $2); }
              |  assignment                     { $$ = $1; }
              |  funcCall                       { $$ = $1; }
-             |  REPEAT statement_list UNTIL expr {$$ = makerepeat($1, $2, $3, $4);}
              ;
 
-//  assignment_list  : assignment SEMICOLON assignment_list { $$ = cons($1, $3); }
-//                   | assignment SEMICOLON        { $$ = $1; }
-//                   ;
-
-  statement_list : statement SEMICOLON statement_list{ $$ = cons($1, $3); }
-                 | statement                         { $$ = $1; }
-                 ;
-          
   funcCall   : IDENTIFIER LPAREN expr RPAREN   { $$ = makefuncall((TOKEN) talloc(), $1, $3);}
              ; 
 
@@ -162,12 +150,7 @@ TOKEN parseresult;
              ;
 
   expr       :  expr PLUS term                 { $$ = binop($2, $1, $3); }
-             |  expr MINUS term                { $$ = binop($2, $1, $3); }
              |  term                           { $$ = $1; }
-             |  funcCall TIMES funcCall        { $$ = binop($2, $1, $3); }
-             |  funcCall                       { $$ = $1; }
-             |  term EQ term                   { $$ = binop($2, $1, $3); }
-             |  MINUS term                     { $$ = binop($1, $2, $2); }
              ;
 
   term       :  term TIMES factor              { $$ = binop($2, $1, $3); }
@@ -208,24 +191,6 @@ TOKEN parseresult;
 
    /*  Note: you should add to the above values and insert debugging
        printouts in your routines similar to those that are shown here.     */
-
- /* makerepeat makes structures for a repeat statement.
-   tok and tokb are (now) unused tokens that are recycled. */
-TOKEN makerepeat(TOKEN tok, TOKEN statements, TOKEN tokb, TOKEN expr){
-  int num_to_go_to = labelnumber;
-  TOKEN labeltok = makelabel();
-  tok = makeprogn(tok, labeltok);
-  TOKEN progn_statements = makeprogn(tokb, statements);
-  labeltok->link = progn_statements;
-  TOKEN go_to_tok = makegoto(num_to_go_to);
-  TOKEN empty_progn = makeprogn((TOKEN) talloc(), NULL);
-  empty_progn->link = go_to_tok;
-  TOKEN if_token = talloc();
-  if_token = makeif(if_token, expr, empty_progn, go_to_tok);
-  progn_statements->link = if_token;
-  return tok;
-}
-
 
 
 /* cons links a new item onto the front of a list.  Equivalent to a push.
@@ -516,36 +481,8 @@ TOKEN findid(TOKEN tok)
 }
 
 /* instconst installs a constant in the symbol table */
-void instconst(TOKEN idtok, TOKEN consttok) 
-{  
-  SYMBOL sym, type; 
-  int align;
-    if(consttok->datatype == INTEGER)
-    {
-      type = searchst("integer");	
-      //sym->constval.intnum = consttok->intval;
-
-    }
-    else if(consttok->datatype == REAL)
-    {
-      type = searchst("real");
-      //sym->constval.realnum = consttok->realval;
-    }
-
-    align = alignsize(type);
-    sym = insertsym(idtok->stringval);
-    sym->kind = CONSTSYM;
-    sym->datatype = type;
-    sym->size = type->size;
-    sym->basicdt = type->basicdt;
-    if(consttok->datatype == INTEGER)
-    {
-      sym->constval.intnum = consttok->intval;
-    }
-    else if(consttok->datatype == REAL)
-    { 
-      sym->constval.realnum = consttok->realval;
-    }
+void  instconst(TOKEN idtok, TOKEN consttok)
+{
 }
 
 

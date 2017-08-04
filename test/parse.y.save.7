@@ -92,6 +92,7 @@ TOKEN parseresult;
              | IDENTIFIER EQ NUMBER SEMICOLON  { instconst($1, $3); }
              ;  
 
+
   tBlock     : TYPE tdef_list vBlock           { $$ = $3; }
              | vBlock                          { $$ = $1; }
              ;
@@ -110,7 +111,8 @@ TOKEN parseresult;
              ;
 
 
-  vBlock     : VAR vdef_list block             { $$ = $3; }       
+  vBlock     : VAR vdef_list block             { $$ = $3; }  
+             | block                           { $$ = $1; }
              ;
 
   block      : BEGINBEGIN statement endpart   { $$ = makeprogn($1,cons($2, $3)); }
@@ -124,7 +126,7 @@ TOKEN parseresult;
              ;
 
   vid_list   : IDENTIFIER COMMA vid_list       { $$ = cons($1, $3); }
-             | IDENTIFIER                      { $$ = $1; }
+             | IDENTIFIER                      { $$ = cons($1, NULL); }
              ;
 
   varType    : IDENTIFIER                      { $$ = $1; }
@@ -133,20 +135,15 @@ TOKEN parseresult;
   statement  :  BEGINBEGIN statement endpart   { $$ = makeprogn($1,cons($2, $3)); }
              |  IF expr THEN statement endif   { $$ = makeif($1, $2, $4, $5); }
              |  FOR assignment TO IDENTIFIER DO statement { $$ = makefor(1, (TOKEN) talloc(), $2, $4, NULL, NULL, $6); }            
-            // |  assignment_list statement      { $$ = cons($1, $2); }
              |  assignment                     { $$ = $1; }
+            // |  statement_list                 { $$ = $1; }
              |  funcCall                       { $$ = $1; }
-             |  REPEAT statement_list UNTIL expr {$$ = makerepeat($1, $2, $3, $4);}
+             |  REPEAT statement_list UNTIL statement {$$ = makerepeat($1, $2, $3, $4);}
              ;
 
-//  assignment_list  : assignment SEMICOLON assignment_list { $$ = cons($1, $3); }
-//                   | assignment SEMICOLON        { $$ = $1; }
-//                   ;
+  statement_list : statement SEMICOLON statement{ $$ = $1; }
+                 | statement SEMICOLON          { $$ = $1; }
 
-  statement_list : statement SEMICOLON statement_list{ $$ = cons($1, $3); }
-                 | statement                         { $$ = $1; }
-                 ;
-          
   funcCall   : IDENTIFIER LPAREN expr RPAREN   { $$ = makefuncall((TOKEN) talloc(), $1, $3);}
              ; 
 
@@ -165,9 +162,7 @@ TOKEN parseresult;
              |  expr MINUS term                { $$ = binop($2, $1, $3); }
              |  term                           { $$ = $1; }
              |  funcCall TIMES funcCall        { $$ = binop($2, $1, $3); }
-             |  funcCall                       { $$ = $1; }
-             |  term EQ term                   { $$ = binop($2, $1, $3); }
-             |  MINUS term                     { $$ = binop($1, $2, $2); }
+             |  funcCall 
              ;
 
   term       :  term TIMES factor              { $$ = binop($2, $1, $3); }
@@ -517,35 +512,30 @@ TOKEN findid(TOKEN tok)
 
 /* instconst installs a constant in the symbol table */
 void instconst(TOKEN idtok, TOKEN consttok) 
-{  
-  SYMBOL sym, type; 
-  int align;
-    if(consttok->datatype == INTEGER)
-    {
-      type = searchst("integer");	
-      //sym->constval.intnum = consttok->intval;
+{    
+	SYMBOL sym, type; 
+        int align;
+/*
+	if(consttok->datatype == 1){
+		type = searchst("real");		//this works though...
+	}
+	else if(consttok->datatype == 0){
+		type = searchst("integer");
+	}
+*/
 
-    }
-    else if(consttok->datatype == REAL)
-    {
-      type = searchst("real");
-      //sym->constval.realnum = consttok->realval;
-    }
-
-    align = alignsize(type);
-    sym = insertsym(idtok->stringval);
-    sym->kind = CONSTSYM;
-    sym->datatype = type;
-    sym->size = type->size;
-    sym->basicdt = type->basicdt;
-    if(consttok->datatype == INTEGER)
-    {
-      sym->constval.intnum = consttok->intval;
-    }
-    else if(consttok->datatype == REAL)
-    { 
-      sym->constval.realnum = consttok->realval;
-    }
+        type = searchst(idtok->symtype);
+	align = alignsize(type);
+	
+	sym = insertsym(idtok->stringval);
+	sym->kind = CONSTSYM;
+	sym->size = type->size;
+	sym->datatype = type;
+	sym->basicdt = type->basicdt;
+	if(sym->basicdt == INTEGER)
+		sym->constval.intnum = consttok->intval;
+	else if(sym->basicdt == REAL)
+		sym->constval.realnum = consttok->realval;
 }
 
 
