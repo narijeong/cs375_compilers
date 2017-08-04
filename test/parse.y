@@ -79,10 +79,14 @@ TOKEN parseresult;
   program    : PROGRAM IDENTIFIER LPAREN IDENTIFIER RPAREN SEMICOLON lBlock DOT { parseresult = makeprogram($2, $4, $7); }
              ;
 
-  lBlock     : cBlock                          { $$ = $1; }
+  lBlock     : LABEL numlist SEMICOLON cBlock  { $$ = $4; }
+             | cBlock                          { $$ = $1; }
              ;
 
-
+  numlist    : NUMBER COMMA numlist           // { instlabel($1); }
+             | NUMBER                         // { instlabel($1); }
+             ;
+         
   cBlock     : CONST c_list tBlock             { $$ = $3; }
              | tBlock                          { $$ = $1; }
 	     ;
@@ -212,17 +216,22 @@ TOKEN parseresult;
  /* makerepeat makes structures for a repeat statement.
    tok and tokb are (now) unused tokens that are recycled. */
 TOKEN makerepeat(TOKEN tok, TOKEN statements, TOKEN tokb, TOKEN expr){
-  int num_to_go_to = labelnumber;
-  TOKEN labeltok = makelabel();
-  tok = makeprogn(tok, labeltok);
-  TOKEN progn_statements = makeprogn(tokb, statements);
-  labeltok->link = progn_statements;
-  TOKEN go_to_tok = makegoto(num_to_go_to);
-  TOKEN empty_progn = makeprogn((TOKEN) talloc(), NULL);
-  empty_progn->link = go_to_tok;
-  TOKEN if_token = talloc();
-  if_token = makeif(if_token, expr, empty_progn, go_to_tok);
-  progn_statements->link = if_token;
+  int to = labelnumber;
+  //making label token
+  TOKEN label = makelabel();
+  tok = makeprogn(tok, label);
+   
+  // for the statment 
+  TOKEN progn = makeprogn(tokb, statements);
+  label->link = progn;
+  TOKEN to_tok = makegoto(to);
+  TOKEN link_progn = makeprogn((TOKEN) talloc(), NULL);
+  link_progn->link = to_tok;
+
+  TOKEN iftok = talloc();
+  iftok = makeif(iftok, expr, link_progn, to_tok);
+  progn->link = iftok;
+
   return tok;
 }
 
@@ -517,7 +526,7 @@ TOKEN findid(TOKEN tok)
 
 /* instconst installs a constant in the symbol table */
 void instconst(TOKEN idtok, TOKEN consttok) 
-{  
+{
   SYMBOL sym, type; 
   int align;
     if(consttok->datatype == INTEGER)
@@ -537,12 +546,12 @@ void instconst(TOKEN idtok, TOKEN consttok)
     sym->kind = CONSTSYM;
     sym->datatype = type;
     sym->size = type->size;
-    sym->basicdt = type->basicdt;
-    if(consttok->datatype == INTEGER)
+    sym->basicdt = consttok->datatype;
+    if(sym->basicdt == INTEGER)
     {
       sym->constval.intnum = consttok->intval;
     }
-    else if(consttok->datatype == REAL)
+    else if(sym->basicdt == REAL)
     { 
       sym->constval.realnum = consttok->realval;
     }
